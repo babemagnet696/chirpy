@@ -33,3 +33,5 @@ go.work.sum
 
 # Project Specific
 out
+*.rest
+*.http
