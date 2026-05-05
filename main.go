@@ -19,9 +19,10 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/app/", apiCfg.getAppHandler(filepathRoot))
 
-	mux.HandleFunc("GET  /api/healthz", greetHandler)
-	mux.HandleFunc("GET  /admin/metrics", apiCfg.handlerMetrics)
-	mux.HandleFunc("POST /admin/reset",   apiCfg.handlerReset)
+	mux.HandleFunc("GET  /api/healthz",        greetHandler)
+	mux.HandleFunc("GET  /admin/metrics",      apiCfg.handlerMetrics)
+	mux.HandleFunc("POST /admin/reset",        apiCfg.handlerReset)
+	mux.HandleFunc("POST /api/validate_chirp", handlerValidate)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
