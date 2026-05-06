@@ -15,12 +15,12 @@ func handlerValidate(w http.ResponseWriter, r *http.Request) {
 	params := parameters{}
 
 	if err := decoder.Decode(&params); err != nil {
-		respondWithError(w, http.StatusBadRequest, "Malformed JSON")
+		respondWithError(w, http.StatusBadRequest, "Malformed JSON", err)
 		return
 	}
 
 	if len(params.Body) > 140 {
-		respondWithError(w, http.StatusBadRequest, "Chirp is too long")
+		respondWithError(w, http.StatusBadRequest, "Chirp is too long", nil)
 		return
 	}
 
@@ -31,6 +31,8 @@ func handlerValidate(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, successResult{CleanedBody: profanityCheck(params.Body)})
 
 }
+
+
 
 func profanityCheck(text string) string {
 	badWords := map[string]struct{}{
