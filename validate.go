@@ -9,7 +9,6 @@ import (
 func handlerValidate(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Body string `json:"body"`
-		Cleaned_body string `json:"clean_body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -25,12 +24,11 @@ func handlerValidate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params.Cleaned_body = profanityCheck(params.Body)
 
 	type successResult struct {
-		Valid bool `json:"valid"`
+		CleanedBody string `json:"cleaned_body"`
 	}
-	respondWithJSON(w, http.StatusOK, successResult{Valid: true})
+	respondWithJSON(w, http.StatusOK, successResult{CleanedBody: profanityCheck(params.Body)})
 
 }
 
