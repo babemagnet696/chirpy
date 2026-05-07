@@ -1,20 +1,17 @@
 package main
 
 import (
-	"net/http"
 	"strings"
 	"fmt"
 )
 
-func validate(w http.ResponseWriter, body string) (string, error) {
+func validateChirpBody( body string) (string, error) {
 
 	if len(body) > 140 {
-		respondWithError(w, http.StatusBadRequest, "Chirp is too long", nil)
-		return body, fmt.Errorf("Chirp is too long")
+		return "", fmt.Errorf("Chirp is too long")
 	}
 
 	return profanityCheck(body), nil
-
 }
 
 

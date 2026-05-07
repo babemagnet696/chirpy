@@ -1,12 +1,14 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
+	"time"
+
+	// "github.com/babemagnet696/chirpy/internal/auth"
 	"github.com/babemagnet696/chirpy/internal/database"
 	"github.com/google/uuid"
-	"time"
-	"database/sql"
 )
 
 type Chirp struct {
@@ -20,27 +22,32 @@ type Chirp struct {
 func (cfg *apiConfig) handlerChirp(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Body   string    `json:"body"`
-		UserID uuid.UUID `json:"user_id"`
+	}
+
+	userID, err := cfg.getIdFromRequest(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "unauthorized", err)
 	}
 
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
-
 	if err := decoder.Decode(&params); err != nil {
-		respondWithError(w, http.StatusBadRequest, "Malformed JSON", err)
+		respondWithError(w, http.StatusBadRequest, "malformed JSON", err)
 		return
 	}
 
-	cleanRes, err := validate(w, params.Body)
+
+	cleanRes, err := validateChirpBody(params.Body)
 	if err != nil {
-		return // error is handled by validate already
+		respondWithError(w, http.StatusBadRequest, "Chirp is too long", nil)
+		return
 	}
 
 	params.Body = cleanRes
 
 	dbChirp, err := cfg.db.CreateChirp(r.Context(), database.CreateChirpParams{
 		Body:     params.Body,
-		UserID:   params.UserID,
+		UserID:   userID,
 	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Error creating chirp", err)
@@ -56,16 +63,6 @@ func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, r *http.Request) {
 	resp, err := cfg.db.GetChirps(r.Context())
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Error getting chirps", nil)
-		return
-	}
-
-	if len(resp) == 0 {
-		emptyResponse := struct{
-			Body string `json:"body"`
-		}{
-			Body: "There are no chirps to display",
-		}
-		respondWithJSON(w, http.StatusOK, emptyResponse)
 		return
 	}
 
