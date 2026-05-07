@@ -6,19 +6,21 @@ import (
 	"github.com/google/uuid"
 	"time"
 	"github.com/babemagnet696/chirpy/internal/database"
+	"github.com/babemagnet696/chirpy/internal/auth"
 )
 
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
+	ID              uuid.UUID `json:"id"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+	Email           string    `json:"email"`
 }
 
 
 func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Email string `json:"email"`
+		Password string `json:"password"`
+		Email    string `json:"email"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -28,8 +30,16 @@ func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) 
 		respondWithError(w, http.StatusBadRequest, "Malformed JSON", err)
 		return
 	}
+	hash, err := auth.HashPassword(params.Password)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't create user", err)
+		return
+	}
 
-	dbUser, err := cfg.db.CreateUser(r.Context(), params.Email)
+	dbUser, err := cfg.db.CreateUser(r.Context(), database.CreateUserParams{
+		HashedPassword: hash,
+		Email:          params.Email,
+	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't create user", err)
 		return
@@ -41,9 +51,9 @@ func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) 
 
 func dbUsertoUser(du database.User) User {
 	return User{
-		ID:        du.ID,
-		CreatedAt: du.CreatedAt,
-		UpdatedAt: du.UpdatedAt,
-		Email:     du.Email,
+		ID:              du.ID,
+		CreatedAt:       du.CreatedAt,
+		UpdatedAt:       du.UpdatedAt,
+		Email:           du.Email,
 	}
 }
