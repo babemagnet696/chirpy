@@ -24,3 +24,4 @@ func CheckPasswordHash(pw, hash string) (bool, error) {
 
 	return true, nil
 }
+
