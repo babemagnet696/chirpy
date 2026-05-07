@@ -56,6 +56,5 @@ func dbUsertoUser(du database.User) User {
 		CreatedAt:       du.CreatedAt,
 		UpdatedAt:       du.UpdatedAt,
 		Email:           du.Email,
-		Token:           du.Token,
 	}
 }

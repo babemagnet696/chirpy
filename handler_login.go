@@ -12,7 +12,6 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Password         string        `json:"password"`
 		Email            string        `json:"email"`
-		ExpiresInSeconds time.Duration `json:"expires_in_seconds"`
 	}
 	type response struct {
 		User
@@ -35,17 +34,13 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 
-	expirationTime := time.Hour
-	if params.ExpiresInSeconds > 0 && params.ExpiresInSeconds < 3600 {
-		expirationTime = time.Duration(params.ExpiresInSeconds) * time.Second
-	}
+	expirationTime := 1 * time.Hour
 
 	token, err := auth.MakeJWT(dbUser.ID, cfg.secret, expirationTime)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Error generating session", err)
 	}
-
-	
+	refresh_token := auth.MakeRefreshToken()	
 
 	ok, err := auth.CheckPasswordHash(params.Password, dbUser.HashedPassword)
 	if err != nil {
@@ -56,13 +51,12 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
-
-	dbUser.Token = token
 	user := dbUsertoUser(dbUser)
+
 
 	respondWithJSON(w, http.StatusOK, response{
 		User: user,
 		Token: token,
+		RefreshToken: refresh_token,
 	})
 }
