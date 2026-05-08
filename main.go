@@ -16,6 +16,7 @@ type apiConfig struct {
 	db             *database.Queries
 	platform       string
 	secret         string
+	apiKey         string
 }
 
 func main() {
@@ -29,6 +30,7 @@ func main() {
 	dbURL :=          os.Getenv("DB_URL")
 	apiCfg.platform = os.Getenv("PLATFORM")
 	apiCfg.secret =   os.Getenv("TOKEN_SECRET")
+	apiCfg.apiKey =   os.Getenv("POLKA_KEY")
 
 
 
@@ -50,12 +52,17 @@ func main() {
 	mux.HandleFunc("GET  /api/chirps",           apiCfg.handlerGetChirps)
 	mux.HandleFunc("GET  /api/chirps/{chirpID}", apiCfg.handlerGetChirp)
 
-	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
-	mux.HandleFunc("POST /api/users",   apiCfg.handlerCreateUser)
-	mux.HandleFunc("POST /api/login",   apiCfg.handlerLogin)
-	mux.HandleFunc("POST /api/chirps",  apiCfg.handlerChirp)
-	mux.HandleFunc("POST /api/refresh", apiCfg.handlerRefreshTokenAuth)
-	mux.HandleFunc("POST /api/revoke",  apiCfg.handlerRevokeToken)
+	mux.HandleFunc("POST /admin/reset",       apiCfg.handlerReset)
+	mux.HandleFunc("POST /api/users",         apiCfg.handlerCreateUser)
+	mux.HandleFunc("POST /api/login",         apiCfg.handlerLogin)
+	mux.HandleFunc("POST /api/chirps",        apiCfg.handlerChirp)
+	mux.HandleFunc("POST /api/refresh",       apiCfg.handlerRefreshTokenAuth)
+	mux.HandleFunc("POST /api/revoke",        apiCfg.handlerRevokeToken)
+	mux.HandleFunc("POST /api/polka/webhooks", apiCfg.handlerRedChirpy)
+
+	mux.HandleFunc("PUT /api/users", apiCfg.handlerUpdateUser)
+
+	mux.HandleFunc("DELETE /api/chirps/{chirpID}", apiCfg.handlerDeleteChirp)
 	
 
 	
