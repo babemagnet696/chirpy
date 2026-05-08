@@ -45,8 +45,8 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/app/", apiCfg.getAppHandler(filepathRoot))
 
-	mux.HandleFunc("GET  /api/healthz",          greetHandler)
 	mux.HandleFunc("GET  /admin/metrics",        apiCfg.handlerMetrics)
+	mux.HandleFunc("GET  /api/healthz",          greetHandler)
 	mux.HandleFunc("GET  /api/chirps",           apiCfg.handlerGetChirps)
 	mux.HandleFunc("GET  /api/chirps/{chirpID}", apiCfg.handlerGetChirp)
 
@@ -54,6 +54,8 @@ func main() {
 	mux.HandleFunc("POST /api/users",   apiCfg.handlerCreateUser)
 	mux.HandleFunc("POST /api/login",   apiCfg.handlerLogin)
 	mux.HandleFunc("POST /api/chirps",  apiCfg.handlerChirp)
+	mux.HandleFunc("POST /api/refresh", apiCfg.handlerRefreshTokenAuth)
+	mux.HandleFunc("POST /api/revoke",  apiCfg.handlerRevokeToken)
 	
 
 	

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/babemagnet696/chirpy/internal/auth"
+	"github.com/babemagnet696/chirpy/internal/database"
 )
 
 func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +41,11 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Error generating session", err)
 	}
-	refresh_token := auth.MakeRefreshToken()	
+	
+	dbRefreshToken, err := cfg.db.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
+		Token: auth.MakeRefreshToken(),
+		UserID: dbUser.ID,
+	})
 
 	ok, err := auth.CheckPasswordHash(params.Password, dbUser.HashedPassword)
 	if err != nil {
@@ -57,6 +62,6 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, response{
 		User: user,
 		Token: token,
-		RefreshToken: refresh_token,
+		RefreshToken: dbRefreshToken.Token,
 	})
 }

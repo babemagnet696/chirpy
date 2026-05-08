@@ -29,3 +29,18 @@ func (cfg *apiConfig) handlerRefreshTokenAuth(w http.ResponseWriter, r *http.Req
 
 	respondWithJSON(w, http.StatusOK, response{newToken})
 }
+
+func (cfg *apiConfig) handlerRevokeToken(w http.ResponseWriter, r *http.Request) {
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "unauthorized", err)
+		return
+	}
+
+	if err = cfg.db.RevokeToken(r.Context(), token); err != nil {
+		respondWithError(w, http.StatusInternalServerError, "error", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusNoContent, nil)
+}
